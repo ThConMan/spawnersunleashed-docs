@@ -151,8 +151,13 @@ this plugin uninstalled.</p>
   <li><code>/su give</code> uses the same item builder as the mined drop, so it is a real test of that
       path rather than a parallel one that can drift.</li>
   <li>Spawner-farm finder with single-linkage clustering and teleport-to-group.</li>
-  <li>Optional TNT and creeper drops, per-mob mine and place permissions, world allow and deny lists,
-      fully configurable messages.</li>
+  <li><strong>Fireproof drops.</strong> A dropped spawner ignores fire and lava, and hops out of
+      lava instead of sinking into it. Applied to the dropped entity rather than the item's
+      components, so mined spawners still stack with shop-bought ones &mdash; and spawners this
+      plugin never made are protected too.</li>
+  <li>Per-world on/off from the menu. Nothing here needs a text editor.</li>
+  <li>Optional TNT and creeper drops, per-mob mine and place permissions, fully configurable
+      messages.</li>
   <li>Menus cannot dupe: decoration-only windows behind a guard that refuses clicks, shift-clicks,
       drags, hotbar swaps, offhand swaps and hopper pulls at lowest priority.</li>
 </ul>

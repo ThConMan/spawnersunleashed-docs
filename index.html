@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SpawnersUnleashed</title>
+<meta name="description" content="Silk-touch spawner drops and spawner placement for Paper. Fixes the two faults that make spawners come out blank.">
+<style>
+:root {
+  --bg: #ffffff;
+  --panel: #f6f7f9;
+  --line: #e3e6ea;
+  --ink: #16191d;
+  --muted: #5c6470;
+  --accent: #1a7f6b;
+  --accent-soft: #e6f4f0;
+  --warn: #a13b2f;
+  --code-bg: #f0f2f5;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #101317;
+    --panel: #171b21;
+    --line: #262c34;
+    --ink: #e8ebef;
+    --muted: #9aa4b1;
+    --accent: #4ecdb0;
+    --accent-soft: #14261f;
+    --warn: #e08a7d;
+    --code-bg: #1b2027;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 780px; margin: 0 auto; padding: 0 24px 96px; }
+header { padding: 72px 0 40px; border-bottom: 1px solid var(--line); }
+h1 { font-size: 2.4rem; margin: 0 0 12px; letter-spacing: -0.02em; }
+.tagline { font-size: 1.12rem; color: var(--muted); margin: 0 0 24px; max-width: 60ch; }
+.badges { display: flex; flex-wrap: wrap; gap: 8px; }
+.badge {
+  font: 500 0.8rem/1 var(--mono);
+  padding: 6px 10px; border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+}
+h2 { font-size: 1.35rem; margin: 48px 0 8px; letter-spacing: -0.01em; }
+h3 { font-size: 1rem; margin: 28px 0 6px; }
+p { margin: 0 0 16px; }
+a { color: var(--accent); }
+code {
+  font: 0.875em/1.4 var(--mono);
+  background: var(--code-bg); padding: 2px 5px; border-radius: 4px;
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--line);
+  border-radius: 8px; padding: 14px 16px; overflow-x: auto; margin: 0 0 18px;
+}
+pre code { background: none; padding: 0; font-size: 0.85rem; }
+.callout {
+  border-left: 3px solid var(--accent); background: var(--panel);
+  padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 0 0 20px;
+}
+.callout.warn { border-left-color: var(--warn); }
+.callout p:last-child { margin-bottom: 0; }
+.bug { border: 1px solid var(--line); border-radius: 10px; padding: 20px 22px; margin: 0 0 18px; background: var(--panel); }
+.bug h3 { margin-top: 0; }
+.bug .sub { color: var(--muted); font-size: 0.9rem; margin: -2px 0 12px; }
+.tablewrap { overflow-x: auto; margin: 0 0 20px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; }
+td code { white-space: nowrap; }
+ul { margin: 0 0 16px; padding-left: 20px; }
+li { margin-bottom: 7px; }
+footer { border-top: 1px solid var(--line); margin-top: 64px; padding-top: 24px; color: var(--muted); font-size: 0.88rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>SpawnersUnleashed</h1>
+  <p class="tagline">Silk-touch spawner drops and spawner placement for Paper, written because two
+  separate faults on modern Paper make spawners come out blank and nothing on the market fixes both.</p>
+  <div class="badges">
+    <span class="badge">Paper 26.1</span>
+    <span class="badge">Java 25</span>
+    <span class="badge">No dependencies</span>
+  </div>
+</header>
+
+<h2>The compatibility promise</h2>
+<p>The dropped item is a <strong>plain vanilla spawner</strong> with the mob in
+<code>block_entity_data</code> and nothing else. The display name is cosmetic. That is the whole
+compatibility story: it works with g2shop, EconomyShopGUI, auction houses, hoppers, shulkers, and with
+this plugin uninstalled.</p>
+
+<div class="callout">
+  <p>Plugins that hide the mob in a <strong>lore line</strong> produce an item no shop can read and no
+  other plugin can place. That single design choice is why their spawners cannot be sold.</p>
+</div>
+
+<h2>The two bugs it fixes</h2>
+
+<div class="bug">
+  <h3>Non-op survival players place blank spawners</h3>
+  <p class="sub">A vanilla rule, not a plugin bug.</p>
+  <p><code>MOB_SPAWNER</code> is in <code>BlockEntityType.OP_ONLY_CUSTOM_DATA</code>, so
+  <code>BlockItem.updateCustomBlockEntityTag</code> refuses to copy an item's
+  <code>block_entity_data</code> onto the block unless:</p>
+<pre><code>player.canUseGameMasterBlocks()                 // op level 2+
+  || (player.getAbilities().instabuild          // creative
+      &amp;&amp; player.hasPermission("minecraft.nbt.place"))</code></pre>
+  <p>A survival player gets a blank spawner and is told nothing. No permission fixes it, because the
+  bypass also demands creative. A plugin has to write the type server-side, which this one does at
+  <code>MONITOR</code> so the final block state is correct whatever else touched it.</p>
+</div>
+
+<div class="bug">
+  <h3>Mining a spawner returns a blank one</h3>
+  <p class="sub">Every Bukkit accessor reads the same field, on the wrong object.</p>
+  <p><code>getSpawnedType()</code>, <code>getSpawnedEntity()</code> and
+  <code>getCreatureTypeName()</code> all read <code>BaseSpawner.nextSpawnData</code> on the
+  <strong>snapshot</strong> returned by <code>Block#getState()</code>, and each returns null when it is
+  unset. A plugin that reads the snapshot then calls <code>setSpawnedType(null)</code>, whose null
+  branch sets <code>nextSpawnData = new SpawnData()</code> and serialises as
+  <code>SpawnData:{entity:{}}</code> &mdash; the blank spawner you end up holding.</p>
+  <p>The fix is <code>Block#getState(false)</code>: a state backed by the <strong>live</strong> tile
+  entity instead of an NBT round-trip. SpawnersUnleashed tries that first, falls back through every
+  other accessor, and logs which one won.</p>
+</div>
+
+<div class="callout warn">
+  <p>If every path fails it <strong>drops nothing and warns</strong>, rather than minting a blank
+  spawner. A silent dud is worse than no item.</p>
+</div>
+
+<h2>Features</h2>
+<ul>
+  <li>Silk-touch drops with configurable minimum level, drop chance, and per-mob chance overrides.</li>
+  <li>Placement repair, so survival players get a working spawner.</li>
+  <li><code>/su admin</code> edits every setting live in game; config.yml is written back immediately,
+      so nothing is lost on restart and there is no apply button to forget.</li>
+  <li><code>/su give</code> uses the same item builder as the mined drop, so it is a real test of that
+      path rather than a parallel one that can drift.</li>
+  <li>Spawner-farm finder with single-linkage clustering and teleport-to-group.</li>
+  <li>Optional TNT and creeper drops, per-mob mine and place permissions, world allow and deny lists,
+      fully configurable messages.</li>
+  <li>Menus cannot dupe: decoration-only windows behind a guard that refuses clicks, shift-clicks,
+      drags, hotbar swaps, offhand swaps and hopper pulls at lowest priority.</li>
+</ul>
+
+<h2>Taking priority over other spawner plugins</h2>
+<p>Event priority is not enough. CMI hands its spawner straight to the player's inventory, so no
+listener ordering can suppress it &mdash; if its module is on, one block yields two spawners. Its
+config is the only real switch:</p>
+<pre><code># plugins/CMI/config.yml
+Spawners:
+  FullDisable: true</code></pre>
+<p>The startup guard re-reads that file every boot and on <code>/su reload</code>, checks eleven known
+spawner plugins by name, and prints every plugin registered on the break and place events &mdash; so a
+future conflict names itself instead of showing up as a duplicate spawner.</p>
+
+<h2>Commands</h2>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Command</th><th>Permission</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td><code>/su give &lt;mob&gt; [amount] [player]</code></td><td><code>spawnersunleashed.give</code></td><td>Give a working spawner</td></tr>
+    <tr><td><code>/su scan [radius|world]</code></td><td><code>spawnersunleashed.scan</code></td><td>Find spawner farms nearby</td></tr>
+    <tr><td><code>/su tp &lt;#&gt;</code></td><td><code>spawnersunleashed.scan</code></td><td>Jump to a group from the last scan</td></tr>
+    <tr><td><code>/su admin</code></td><td><code>spawnersunleashed.admin</code></td><td>Live settings menu</td></tr>
+    <tr><td><code>/su reload</code></td><td><code>spawnersunleashed.admin</code></td><td>Reload and re-run the conflict check</td></tr>
+  </tbody>
+</table>
+</div>
+<p><code>spawnersunleashed.drop</code> (default true) is what lets a player collect a spawner at all.
+<code>spawnersunleashed.bypass.chance</code> ignores the drop chance.</p>
+
+<h2>The scanner reads loaded chunks only</h2>
+<p>Reaching unloaded chunks would mean loading or generating them, which lags a live server. A scan
+therefore describes the world as it currently is in memory. Run it while the area is occupied &mdash;
+which is exactly when a farm is worth looking at.</p>
+
+<h2>Requirements</h2>
+<p>Paper 26.1 or newer. No dependencies, no library downloads, no database. Drop the jar in
+<code>plugins/</code> and restart; the config writes itself on first boot.</p>
+
+<footer>
+  <p>SpawnersUnleashed by ThConMan</p>
+</footer>
+
+</div>
+</body>
+</html>

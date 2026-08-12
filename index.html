@@ -3,205 +3,323 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SpawnersUnleashed</title>
-<meta name="description" content="Silk-touch spawner drops and spawner placement for Paper. Fixes the two faults that make spawners come out blank.">
-<style>
-:root {
-  --bg: #ffffff;
-  --panel: #f6f7f9;
-  --line: #e3e6ea;
-  --ink: #16191d;
-  --muted: #5c6470;
-  --accent: #1a7f6b;
-  --accent-soft: #e6f4f0;
-  --warn: #a13b2f;
-  --code-bg: #f0f2f5;
-  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #101317;
-    --panel: #171b21;
-    --line: #262c34;
-    --ink: #e8ebef;
-    --muted: #9aa4b1;
-    --accent: #4ecdb0;
-    --accent-soft: #14261f;
-    --warn: #e08a7d;
-    --code-bg: #1b2027;
-  }
-}
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-.wrap { max-width: 780px; margin: 0 auto; padding: 0 24px 96px; }
-header { padding: 72px 0 40px; border-bottom: 1px solid var(--line); }
-h1 { font-size: 2.4rem; margin: 0 0 12px; letter-spacing: -0.02em; }
-.tagline { font-size: 1.12rem; color: var(--muted); margin: 0 0 24px; max-width: 60ch; }
-.badges { display: flex; flex-wrap: wrap; gap: 8px; }
-.badge {
-  font: 500 0.8rem/1 var(--mono);
-  padding: 6px 10px; border-radius: 999px;
-  background: var(--accent-soft); color: var(--accent);
-  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
-}
-h2 { font-size: 1.35rem; margin: 48px 0 8px; letter-spacing: -0.01em; }
-h3 { font-size: 1rem; margin: 28px 0 6px; }
-p { margin: 0 0 16px; }
-a { color: var(--accent); }
-code {
-  font: 0.875em/1.4 var(--mono);
-  background: var(--code-bg); padding: 2px 5px; border-radius: 4px;
-}
-pre {
-  background: var(--code-bg); border: 1px solid var(--line);
-  border-radius: 8px; padding: 14px 16px; overflow-x: auto; margin: 0 0 18px;
-}
-pre code { background: none; padding: 0; font-size: 0.85rem; }
-.callout {
-  border-left: 3px solid var(--accent); background: var(--panel);
-  padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 0 0 20px;
-}
-.callout.warn { border-left-color: var(--warn); }
-.callout p:last-child { margin-bottom: 0; }
-.bug { border: 1px solid var(--line); border-radius: 10px; padding: 20px 22px; margin: 0 0 18px; background: var(--panel); }
-.bug h3 { margin-top: 0; }
-.bug .sub { color: var(--muted); font-size: 0.9rem; margin: -2px 0 12px; }
-.tablewrap { overflow-x: auto; margin: 0 0 20px; }
-table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
-th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
-th { font-weight: 600; color: var(--muted); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; }
-td code { white-space: nowrap; }
-ul { margin: 0 0 16px; padding-left: 20px; }
-li { margin-bottom: 7px; }
-footer { border-top: 1px solid var(--line); margin-top: 64px; padding-top: 24px; color: var(--muted); font-size: 0.88rem; }
-</style>
+<title>SpawnersUnleashed - spawners that actually keep their mob</title>
+<meta name="description" content="Silk-touch spawner drops and spawner placement for Paper. Fixes the two separate faults that make spawners come out blank, and drops a plain vanilla item any shop can read.">
+<meta property="og:title" content="SpawnersUnleashed">
+<meta property="og:description" content="Mine a spawner, get that spawner. Place it, and it still works. A plain vanilla item any shop can read.">
+<meta property="og:type" content="website">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="wrap">
+<div class="progress" aria-hidden="true"></div>
 
-<header>
-  <h1>SpawnersUnleashed</h1>
-  <p class="tagline">Silk-touch spawner drops and spawner placement for Paper, written because two
-  separate faults on modern Paper make spawners come out blank and nothing on the market fixes both.</p>
-  <div class="badges">
-    <span class="badge">Paper 26.1</span>
-    <span class="badge">Java 25</span>
-    <span class="badge">No dependencies</span>
+<nav class="nav" aria-label="Primary navigation">
+  <div class="nav-inner">
+    <a class="nav-logo" href="#top">
+      <span class="logo-mark" aria-hidden="true"><i class="mc mc-spawner"></i></span>
+      <span>Spawners</span><span>Unleashed</span>
+    </a>
+    <div class="nav-links">
+      <a href="#promise">The item</a>
+      <a href="#bugs">The two bugs</a>
+      <a href="#features">Features</a>
+      <a href="#conflicts">Conflicts</a>
+      <a href="#commands">Commands</a>
+      <a class="nav-download" href="#get">Get it</a>
+    </div>
   </div>
-</header>
+</nav>
 
-<h2>The compatibility promise</h2>
-<p>The dropped item is a <strong>plain vanilla spawner</strong> with the mob in
-<code>block_entity_data</code> and nothing else. The display name is cosmetic. That is the whole
-compatibility story: it works with g2shop, EconomyShopGUI, auction houses, hoppers, shulkers, and with
-this plugin uninstalled.</p>
+<main id="top">
 
-<div class="callout">
-  <p>Plugins that hide the mob in a <strong>lore line</strong> produce an item no shop can read and no
-  other plugin can place. That single design choice is why their spawners cannot be sold.</p>
-</div>
+  <header class="plugin-hero">
+    <div class="runefield" aria-hidden="true">
+      <svg style="left:8%;top:62%;--s:22px;--dur:19s;--delay:0s;--peak:.45;--spin:30deg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+      <svg style="left:19%;top:38%;--s:15px;--dur:23s;--delay:3s;--peak:.35;--spin:-24deg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 2 2 22h20z"/></svg>
+      <svg style="left:31%;top:74%;--s:18px;--dur:17s;--delay:6s;--peak:.4;--spin:40deg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      <svg style="left:68%;top:30%;--s:20px;--dur:21s;--delay:2s;--peak:.42;--spin:-32deg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16M9 4v16"/></svg>
+      <svg style="left:81%;top:66%;--s:16px;--dur:25s;--delay:8s;--peak:.32;--spin:26deg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12h16M12 4v16"/></svg>
+      <svg style="left:90%;top:44%;--s:24px;--dur:18s;--delay:11s;--peak:.38;--spin:-18deg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 22h20z"/></svg>
+      <svg style="left:47%;top:80%;--s:14px;--dur:27s;--delay:5s;--peak:.3;--spin:44deg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><circle cx="12" cy="12" r="8"/></svg>
+    </div>
 
-<h2>The two bugs it fixes</h2>
+    <div class="rune" aria-hidden="true"><i class="mc mc-spawner"></i></div>
 
-<div class="bug">
-  <h3>Non-op survival players place blank spawners</h3>
-  <p class="sub">A vanilla rule, not a plugin bug.</p>
-  <p><code>MOB_SPAWNER</code> is in <code>BlockEntityType.OP_ONLY_CUSTOM_DATA</code>, so
-  <code>BlockItem.updateCustomBlockEntityTag</code> refuses to copy an item's
-  <code>block_entity_data</code> onto the block unless:</p>
-<pre><code>player.canUseGameMasterBlocks()                 // op level 2+
-  || (player.getAbilities().instabuild          // creative
-      &amp;&amp; player.hasPermission("minecraft.nbt.place"))</code></pre>
-  <p>A survival player gets a blank spawner and is told nothing. No permission fixes it, because the
-  bypass also demands creative. A plugin has to write the type server-side, which this one does at
-  <code>MONITOR</code> so the final block state is correct whatever else touched it.</p>
-</div>
+    <p class="eyebrow">Paper 26.1+ &middot; No dependencies</p>
+    <h1>Spawners <span class="glint-text">Unleashed</span></h1>
+    <p class="hero-copy">
+      Mine a spawner and you get <em>that</em> spawner. Place it and it still works. Two
+      separate faults in modern Paper break this, and nothing on the market fixes both, so
+      this plugin fixes both.
+    </p>
+    <div class="plugin-hero-meta">
+      <span class="hero-badge">Plain vanilla item</span>
+      <span class="hero-badge">Works in any shop</span>
+      <span class="hero-badge">Survival placement fixed</span>
+      <span class="hero-badge">Never drops a dud</span>
+    </div>
+    <div class="hero-actions">
+      <a class="button primary" href="#get">Get SpawnersUnleashed</a>
+      <a class="button secondary" href="#bugs">See what it fixes</a>
+    </div>
+  </header>
 
-<div class="bug">
-  <h3>Mining a spawner returns a blank one</h3>
-  <p class="sub">Every Bukkit accessor reads the same field, on the wrong object.</p>
-  <p><code>getSpawnedType()</code>, <code>getSpawnedEntity()</code> and
-  <code>getCreatureTypeName()</code> all read <code>BaseSpawner.nextSpawnData</code> on the
-  <strong>snapshot</strong> returned by <code>Block#getState()</code>, and each returns null when it is
-  unset. A plugin that reads the snapshot then calls <code>setSpawnedType(null)</code>, whose null
-  branch sets <code>nextSpawnData = new SpawnData()</code> and serialises as
-  <code>SpawnData:{entity:{}}</code> &mdash; the blank spawner you end up holding.</p>
-  <p>The fix is <code>Block#getState(false)</code>: a state backed by the <strong>live</strong> tile
-  entity instead of an NBT round-trip. SpawnersUnleashed tries that first, falls back through every
-  other accessor, and logs which one won.</p>
-</div>
+  <div class="statband reveal">
+    <div><b>2</b><span>PAPER BUGS IT WORKS AROUND</span></div>
+    <div><b>11</b><span>RIVAL PLUGINS IT CHECKS FOR</span></div>
+    <div><b>26.1+</b><span>PAPER, JAVA 25</span></div>
+  </div>
 
-<div class="callout warn">
-  <p>If every path fails it <strong>drops nothing and warns</strong>, rather than minting a blank
-  spawner. A silent dud is worse than no item.</p>
-</div>
+  <section class="section" id="promise">
+    <div class="split">
+      <div class="reveal">
+        <i class="mc mc-paper card-kicker-icon" aria-hidden="true"></i>
+        <p class="eyebrow">THE ITEM</p>
+        <h2>A spawner, and nothing clever</h2>
+        <p style="color:var(--text-dim)">
+          What drops is a plain vanilla spawner with the mob stored in
+          <code>block_entity_data</code>. That is the whole item. The display name on it is
+          decoration and nothing reads it.
+        </p>
+        <p style="color:var(--text-dim)">
+          That is also the entire compatibility story. It works with g2shop, EconomyShopGUI,
+          auction houses, hoppers and shulkers. It keeps working if you uninstall this plugin
+          tomorrow.
+        </p>
+        <p class="fine-print">Plugins that hide the mob in a <b>lore line</b> produce an item
+          no shop can read and no other plugin can place. That one decision is why their
+          spawners cannot be sold.</p>
+      </div>
 
-<h2>Features</h2>
-<ul>
-  <li>Silk-touch drops with configurable minimum level, drop chance, and per-mob chance overrides.</li>
-  <li>Placement repair, so survival players get a working spawner.</li>
-  <li><code>/su admin</code> edits every setting live in game; config.yml is written back immediately,
-      so nothing is lost on restart and there is no apply button to forget.</li>
-  <li><code>/su give</code> uses the same item builder as the mined drop, so it is a real test of that
-      path rather than a parallel one that can drift.</li>
-  <li>Spawner-farm finder with single-linkage clustering and teleport-to-group.</li>
-  <li><strong>Fireproof drops.</strong> A dropped spawner ignores fire and lava, and hops out of
-      lava instead of sinking into it. Applied to the dropped entity rather than the item's
-      components, so mined spawners still stack with shop-bought ones &mdash; and spawners this
-      plugin never made are protected too.</li>
-  <li>Per-world on/off from the menu. Nothing here needs a text editor.</li>
-  <li>Optional TNT and creeper drops, per-mob mine and place permissions, fully configurable
-      messages.</li>
-  <li>Menus cannot dupe: decoration-only windows behind a guard that refuses clicks, shift-clicks,
-      drags, hotbar swaps, offhand swaps and hopper pulls at lowest priority.</li>
-</ul>
+      <div class="code-card reveal" data-d="1">
+        <span>WHAT ACTUALLY DROPS</span>
+        <code>minecraft:spawner<br>
+&nbsp;&nbsp;block_entity_data: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;id: "minecraft:mob_spawner",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;SpawnData: { entity: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id: "minecraft:blaze"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;} }<br>
+&nbsp;&nbsp;}</code>
+      </div>
+    </div>
+  </section>
 
-<h2>Taking priority over other spawner plugins</h2>
-<p>Event priority is not enough. CMI hands its spawner straight to the player's inventory, so no
-listener ordering can suppress it &mdash; if its module is on, one block yields two spawners. Its
-config is the only real switch:</p>
-<pre><code># plugins/CMI/config.yml
-Spawners:
-  FullDisable: true</code></pre>
-<p>The startup guard re-reads that file every boot and on <code>/su reload</code>, checks eleven known
-spawner plugins by name, and prints every plugin registered on the break and place events &mdash; so a
-future conflict names itself instead of showing up as a duplicate spawner.</p>
+  <section class="section" id="bugs">
+    <div class="section-heading reveal">
+      <i class="mc mc-diamond_pickaxe card-kicker-icon" aria-hidden="true"></i>
+      <p class="eyebrow">THE TWO BUGS</p>
+      <h2>Neither of these is your fault</h2>
+      <p>They are unrelated, they have different causes, and a plugin has to handle each one
+        separately. Most handle one.</p>
+    </div>
 
-<h2>Commands</h2>
-<div class="tablewrap">
-<table>
-  <thead><tr><th>Command</th><th>Permission</th><th>What it does</th></tr></thead>
-  <tbody>
-    <tr><td><code>/su give &lt;mob&gt; [amount] [player]</code></td><td><code>spawnersunleashed.give</code></td><td>Give a working spawner</td></tr>
-    <tr><td><code>/su scan [radius|world]</code></td><td><code>spawnersunleashed.scan</code></td><td>Find spawner farms nearby</td></tr>
-    <tr><td><code>/su tp &lt;#&gt;</code></td><td><code>spawnersunleashed.scan</code></td><td>Jump to a group from the last scan</td></tr>
-    <tr><td><code>/su admin</code></td><td><code>spawnersunleashed.admin</code></td><td>Live settings menu</td></tr>
-    <tr><td><code>/su reload</code></td><td><code>spawnersunleashed.admin</code></td><td>Reload and re-run the conflict check</td></tr>
-  </tbody>
-</table>
-</div>
-<p><code>spawnersunleashed.drop</code> (default true) is what lets a player collect a spawner at all.
-<code>spawnersunleashed.bypass.chance</code> ignores the drop chance.</p>
+    <div class="loop">
+      <div class="loop-step reveal" data-d="1">
+        <span class="step">01</span>
+        <h3>Survival players place blank spawners</h3>
+        <p>This one is a vanilla rule rather than a bug. Minecraft refuses to copy an item's
+          block data onto the block unless you are op level 2, or in creative with a specific
+          permission. A survival player places a perfectly good spawner, gets an empty one,
+          and is told nothing about why.</p>
+        <p>No permission alone fixes it, because the bypass also demands creative mode. The
+          only way out is to write the mob server-side after placement, which this plugin does
+          last in the chain so the block is correct no matter what else touched it.</p>
+      </div>
+      <div class="loop-step reveal" data-d="2">
+        <span class="step">02</span>
+        <h3>Mining a spawner returns a blank one</h3>
+        <p>Every Bukkit method for asking a spawner what it spawns reads the same field on a
+          <em>snapshot</em> of the block, and that field is often unset. So the method returns
+          null, the plugin helpfully writes that null back, and null is stored as an empty
+          entity. That empty entity is the blank spawner you end up holding.</p>
+        <p>The fix is to ask for a state backed by the <b>live</b> block instead of a copy.
+          This plugin tries that first, falls back through every other method in turn, and
+          logs which one worked.</p>
+      </div>
+    </div>
 
-<h2>The scanner reads loaded chunks only</h2>
-<p>Reaching unloaded chunks would mean loading or generating them, which lags a live server. A scan
-therefore describes the world as it currently is in memory. Run it while the area is occupied &mdash;
-which is exactly when a farm is worth looking at.</p>
+    <div class="command-card reveal">
+      <code>drops nothing</code>
+      <span>If every method fails it <b>drops nothing and warns you</b>, rather than handing
+        out a spawner that looks fine and is not. A silent dud is worse than no item.</span>
+    </div>
+  </section>
 
-<h2>Requirements</h2>
-<p>Paper 26.1 or newer. No dependencies, no library downloads, no database. Drop the jar in
-<code>plugins/</code> and restart; the config writes itself on first boot.</p>
+  <section class="section" id="features">
+    <div class="section-heading reveal">
+      <p class="eyebrow">FEATURES</p>
+      <h2>The rest of it</h2>
+      <p>All of it is edited from <code>/su admin</code> while the server runs, and written
+        straight back to disk.</p>
+    </div>
+
+    <div class="bento">
+      <div class="bento-md card-surface reveal">
+        <i class="mc mc-enchanted_book card-kicker-icon" aria-hidden="true"></i><p class="card-kicker">SILK TOUCH</p>
+        <h3>Who gets to collect one</h3>
+        <p>Require Silk Touch and set the minimum level. Give the drop a percentage chance,
+          then override that chance for individual mobs when a blaze spawner should be rarer
+          than a zombie one.</p>
+      </div>
+
+      <div class="bento-md card-surface reveal" data-d="1">
+        <i class="mc mc-netherite_scrap card-kicker-icon" aria-hidden="true"></i><p class="card-kicker">FIREPROOF</p>
+        <h3>It survives the lava you dropped it in</h3>
+        <p>A dropped spawner ignores fire and lava, and hops out instead of sinking. The
+          protection goes on the dropped entity rather than the item, so mined spawners still
+          stack with shop-bought ones &mdash; and spawners this plugin never made are covered
+          too.</p>
+      </div>
+
+      <div class="bento-lg card-surface reveal">
+        <span class="bento-num">0</span>
+        <h3>Dupe vectors</h3>
+        <p>The menus hold decoration, never real items, behind a guard that refuses clicks,
+          drags, hotbar swaps and hopper pulls.</p>
+      </div>
+
+      <div class="bento-lg card-surface reveal" data-d="1">
+        <span class="bento-num">1</span>
+        <h3>Item builder</h3>
+        <p><code>/su give</code> uses the same code as the mined drop, so it is a real test of
+          that path instead of a second one that can drift.</p>
+      </div>
+
+      <div class="bento-lg card-surface reveal" data-d="2">
+        <span class="bento-num">11</span>
+        <h3>Plugins checked</h3>
+        <p>The startup guard names every known spawner plugin it finds, so a conflict
+          announces itself instead of showing up as a duplicate.</p>
+      </div>
+
+      <div class="bento-md card-surface reveal">
+        <i class="mc mc-tnt card-kicker-icon block" aria-hidden="true"></i><p class="card-kicker">EXPLOSIONS</p>
+        <h3>TNT and creepers, if you want them</h3>
+        <p>Off unless you turn them on, each with its own chance. Handy if you would rather
+          people blow a farm open than stand there with a pickaxe.</p>
+      </div>
+
+      <div class="bento-md card-surface reveal" data-d="1">
+        <i class="mc mc-grass_block card-kicker-icon block" aria-hidden="true"></i><p class="card-kicker">PER WORLD</p>
+        <h3>On where you want it</h3>
+        <p>Switch the whole thing on or off per world from the menu. Per-mob permissions cover
+          who may mine and who may place each type. Nothing here needs a text editor.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="conflicts">
+    <div class="split">
+      <div class="reveal">
+        <i class="mc mc-redstone_torch card-kicker-icon" aria-hidden="true"></i>
+        <p class="eyebrow">CONFLICTS</p>
+        <h2>Why event priority is not enough</h2>
+        <p style="color:var(--text-dim)">
+          CMI hands its spawner straight into the player's inventory. No listener ordering can
+          suppress that, so if its spawner module is on, one block gives you two spawners. Its
+          own config is the only real switch.
+        </p>
+        <p style="color:var(--text-dim)">
+          The startup guard re-reads that file on every boot and on <code>/su reload</code>,
+          checks eleven known spawner plugins by name, and prints everything registered on the
+          break and place events.
+        </p>
+        <p class="fine-print">So a conflict that turns up in six months names itself in the
+          log, rather than appearing as a mysterious duplicate spawner.</p>
+      </div>
+
+      <div class="code-card reveal" data-d="1">
+        <span>plugins/CMI/config.yml</span>
+        <code>Spawners:<br>
+&nbsp;&nbsp;FullDisable: true</code>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="scanner">
+    <div class="section-heading reveal">
+      <p class="eyebrow">THE SCANNER</p>
+      <h2>Finding the farms</h2>
+      <p><code>/su scan</code> groups nearby spawners into clusters and lets you jump to any of
+        them, which is usually how you find out what people have quietly built.</p>
+    </div>
+
+    <p class="fine-print reveal" style="max-width:70ch">It only reads chunks that are already
+      loaded. Reaching further would mean loading or generating them, and that lags a live
+      server. So a scan describes the world as it is in memory right now &mdash; run it while
+      the area is occupied, which is exactly when a farm is worth looking at anyway.</p>
+  </section>
+
+  <section class="section" id="commands">
+    <div class="section-heading reveal">
+      <p class="eyebrow">COMMANDS</p>
+      <h2>Five, under <code>/su</code></h2>
+    </div>
+
+    <div class="config-grid">
+      <div class="config-card card-surface reveal"><span class="config-icon">/su give</span><p>Give someone a working spawner, built exactly like a mined one.</p></div>
+      <div class="config-card card-surface reveal" data-d="1"><span class="config-icon">/su scan</span><p>Find spawner farms in the loaded chunks nearby.</p></div>
+      <div class="config-card card-surface reveal" data-d="2"><span class="config-icon">/su tp</span><p>Jump to a group from the last scan.</p></div>
+      <div class="config-card card-surface reveal"><span class="config-icon">/su admin</span><p>The live settings menu. Everything is in here.</p></div>
+      <div class="config-card card-surface reveal" data-d="1"><span class="config-icon">/su reload</span><p>Reload, and run the conflict check again.</p></div>
+    </div>
+
+    <div class="limits-table card-surface reveal" style="margin-top:34px">
+      <div class="limits-row up"><h3>spawnersunleashed.drop</h3><p>Lets a player collect a spawner at all. On by default.</p></div>
+      <div class="limits-row mid"><h3>spawnersunleashed.bypass.chance</h3><p>Ignores the drop chance entirely.</p></div>
+      <div class="limits-row mid"><h3>spawnersunleashed.give</h3><p>Use <code>/su give</code>.</p></div>
+      <div class="limits-row mid"><h3>spawnersunleashed.scan</h3><p>Use <code>/su scan</code> and <code>/su tp</code>.</p></div>
+      <div class="limits-row off"><h3>spawnersunleashed.admin</h3><p>The settings menu and the reload.</p></div>
+    </div>
+  </section>
+
+  <div class="install-panel" id="get">
+    <div>
+      <h2>Get SpawnersUnleashed</h2>
+      <ol>
+        <li>Drop the jar into <code>plugins/</code> and restart. The config writes itself.</li>
+        <li>If you run CMI, set <code>Spawners.FullDisable: true</code> in its config.</li>
+        <li>Run <code>/su admin</code> and set the drop chance. That is it.</li>
+      </ol>
+      <p class="fine-print">SpawnersUnleashed is proprietary software. Builds are distributed
+        by the author; the source is not public and is not licensed for redistribution or
+        derivative works.</p>
+    </div>
+    <a class="button primary" href="https://github.com/ThConMan">Contact the author</a>
+  </div>
+
+</main>
 
 <footer>
-  <p>SpawnersUnleashed by ThConMan</p>
+  <p class="footer-logo"><span>SpawnersUnleashed</span></p>
+  <p>&copy; 2026 ThConMan. All rights reserved.</p>
+  <p>Requires Paper 26.1 or newer and Java 25. No dependencies, no database.</p>
 </footer>
 
-</div>
+<script>
+(function () {
+  var bar = document.querySelector('.progress');
+  var nav = document.querySelector('.nav');
+  function onScroll() {
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    bar.style.setProperty('--p', max > 0 ? h.scrollTop / max : 0);
+    nav.classList.toggle('is-stuck', h.scrollTop > 8);
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
+    });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: .08 });
+  document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+})();
+</script>
 </body>
 </html>
